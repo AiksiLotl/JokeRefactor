@@ -103,3 +103,15 @@ payload = '''
        calculate_reroll_cost(true)
       end
       G.GAME.current_round.free_rerolls_per_shop = 0'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'functions/button_callbacks.lua'
+pattern = '''            for i = 1, #G.jokers.cards do
+              G.jokers.cards[i]:calculate_joker({reroll_shop = true})
+            end'''
+position = 'after'
+match_indent = true
+payload = '''
+G.GAME.current_round.reroll_shop_context_caught = false'''
