@@ -1,0 +1,32 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_raised_fist=      {order = 29,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 5, name = "Raised Fist", pos = {x=8,y=2}, set = "Joker", effect = "Socialized Mult", cost_mult = 1.0, config = {}},'''
+position = 'at'
+match_indent = true
+payload = '''j_raised_fist=      {order = 29,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 5, name = "Raised Fist", key = "j_raised_fist", pos = {x=8,y=2}, set = "Joker", effect = "Socialized Mult", cost_mult = 1.0, config = {rank_mult = 2.0}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Raised Fist' then'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Raised Fist' then loc_vars = {
+    self.ability.rank_mult,
+    (self.ability.rank_mult ~= 1 and "s" or ""),
+}'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''h_mult = 2*temp_Mult,'''
+position = 'at'
+match_indent = true
+payload = '''h_mult = temp_Mult * self.ability.rank_mult,'''

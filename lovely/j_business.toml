@@ -1,0 +1,38 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_business=         {order = 42,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 4, name = "Business Card", pos = {x=1,y=4}, set = "Joker", effect = "Face Card dollar Chance", cost_mult = 1.0, config = {extra = 2}},'''
+position = 'at'
+match_indent = true
+payload = '''j_business=         {order = 42,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 4, name = "Business Card", key = "j_business", pos = {x=1,y=4}, set = "Joker", effect = "Face Card dollar Chance", cost_mult = 1.0, config = {odds = 1 / 2, money = 2}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Business Card' then loc_vars = {''..(G.GAME and G.GAME.probabilities.normal or 1), self.ability.extra}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Business Card' then loc_vars = {''..(G.GAME and G.GAME.probabilities.normal or 1), (1 / self.ability.odds), self.ability.money}'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''                    pseudorandom('business') < G.GAME.probabilities.normal/self.ability.extra then
+                        G.GAME.dollar_buffer = (G.GAME.dollar_buffer or 0) + 2
+                        G.E_MANAGER:add_event(Event({func = (function() G.GAME.dollar_buffer = 0; return true end)}))
+                        return {
+                            dollars = 2,'''
+position = 'at'
+match_indent = true
+payload = '''                    pseudorandom('business') < (G.GAME.probabilities.normal / (1 / self.ability.odds)) then
+                        G.GAME.dollar_buffer = (G.GAME.dollar_buffer or 0) + self.ability.money
+                        G.E_MANAGER:add_event(Event({func = (function() G.GAME.dollar_buffer = 0; return true end)}))
+                        return {
+                            dollars = self.ability.money,'''

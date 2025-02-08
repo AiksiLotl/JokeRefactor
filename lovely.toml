@@ -1,0 +1,105 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = -1
+
+
+#Multiply joker values function
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''function Card:calculate_joker(context)'''
+position = 'before'
+match_indent = true
+payload = '''-- function to multiply all listed joker values
+function Card:multiply_joker_values(multiplier, deep_table)
+    self:calculate_joker({before_values_updated = true})
+    for k, v in pairs(deep_table or self.ability) do
+        if deep_table or self.config.center.config[k] then
+            if type(v) == "number" then
+                if not deep_table then
+                    self.ability[k] = self.ability[k] * multiplier
+                else
+                    deep_table[k] = deep_table[k] * multiplier
+                end
+            elseif type(v) == "table" then
+                self:multiply_joker_values(multiplier, v)
+            end
+        end
+    end
+    self:calculate_joker({after_values_updated = true})
+end'''
+
+
+#Adds "entering_shop" context for calculate_joker,
+#and increases free_rerolls by free_rerolls_per_shop
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''                                        for i = 1, #G.GAME.tags do
+                                            G.GAME.tags[i]:apply_to_run({type = 'voucher_add'})
+                                        end'''
+position = 'before'
+match_indent = true
+payload = '''for i = 1, #G.jokers.cards do
+    G.jokers.cards[i]:calculate_joker({entering_shop = true})
+end
+
+if G.GAME.current_round.free_rerolls_per_shop > 0 then
+    G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls + G.GAME.current_round.free_rerolls_per_shop
+    calculate_reroll_cost(true)
+end'''
+
+
+#Initializing free_rerolls_per_shop in the game object
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''free_rerolls = 0,'''
+position = 'after'
+match_indent = true
+payload = '''free_rerolls_per_shop = 0,'''
+
+
+#Adding entering_shop, before_values_updated and after_values_updated contexts checks to calculate_joker
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif context.skip_blind then'''
+position = 'before'
+match_indent = true
+payload = '''elseif context.entering_shop then
+    return
+elseif context.before_values_updated then
+    return
+elseif context.after_values_updated then
+    return'''
+
+
+#Subtracting 1 from free_rerolls_per_shop upon a free reroll (if possible)
+[[patches]]
+[patches.pattern]
+target = 'functions/button_callbacks.lua'
+pattern = '''          G.GAME.round_scores.times_rerolled.amt = G.GAME.round_scores.times_rerolled.amt + 1'''
+position = 'after'
+match_indent = true
+payload = '''          if G.GAME.current_round.free_rerolls_per_shop > 0 then
+           G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop - 1
+          end'''
+
+
+#Subtracting the remaining free_rerolls_per_shop from free_rerolls, then setting it to zero
+[[patches]]
+[patches.pattern]
+target = 'functions/button_callbacks.lua'
+pattern = '''      for i = 1, #G.jokers.cards do
+        G.jokers.cards[i]:calculate_joker({ending_shop = true})
+      end'''
+position = 'before'
+match_indent = true
+payload = '''
+      if G.GAME.current_round.free_rerolls_per_shop > 0 then
+       G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls - G.GAME.current_round.free_rerolls_per_shop
+       calculate_reroll_cost(true)
+      end
+      G.GAME.current_round.free_rerolls_per_shop = 0'''

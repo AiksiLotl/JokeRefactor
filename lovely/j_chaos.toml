@@ -1,0 +1,119 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Chaos the Clown' then loc_vars = {self.ability.extra}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Chaos the Clown' then loc_vars = {
+    self.ability.extra,
+    (self.ability.extra ~= 1 and "s" or ""),
+}'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Chaos the Clown' then
+            G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls + 1
+            calculate_reroll_cost(true)
+        end'''
+position = 'at'
+match_indent = true
+payload = '''if self.ability.name == "Chaos the Clown" then
+            if G.STATE == G.STATES.SHOP then
+                G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls + self.ability.extra
+                calculate_reroll_cost(true)
+                G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop + self.ability.extra
+                if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
+            end
+        end'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Chaos the Clown' then
+            G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls - 1
+            calculate_reroll_cost(true)
+        end'''
+position = 'at'
+match_indent = true
+payload = '''if self.ability.name == "Chaos the Clown" then
+            if (self.added_to_deck == false) and not G.SETTINGS.paused then
+                if G.STATE == G.STATES.SHOP then
+                    G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls - self.ability.extra
+                    calculate_reroll_cost(true)
+                    G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop - self.ability.extra
+                    if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
+                end
+            end
+        end'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif context.before_values_updated then'''
+position = 'after'
+match_indent = true
+payload = '''    if self.ability.name == "Chaos the Clown" then
+        if G.STATE == G.STATES.SHOP then
+            G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls - self.ability.extra
+            calculate_reroll_cost(true)
+            G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop - self.ability.extra
+            if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
+            print(self.ability.extra, G.GAME.current_round.free_rerolls, G.GAME.current_round.free_rerolls_per_shop)
+        end
+    end'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif context.after_values_updated then'''
+position = 'after'
+match_indent = true
+payload = '''    if self.ability.name == "Chaos the Clown" then
+        if G.STATE == G.STATES.SHOP then
+            G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls + self.ability.extra
+            calculate_reroll_cost(true)
+            G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop + self.ability.extra
+            if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
+            print(self.ability.extra, G.GAME.current_round.free_rerolls, G.GAME.current_round.free_rerolls_per_shop)
+        end
+    end'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif context.entering_shop then'''
+position = 'after'
+match_indent = true
+payload = '''    if self.ability.name == "Chaos the Clown" then
+        G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop + self.ability.extra
+        if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
+        print(G.GAME.current_round.free_rerolls_per_shop)
+    end'''
+
+
+
+
+[[patches]]
+[patches.pattern]
+target = 'functions/state_events.lua'
+pattern = '''local chaos = find_joker('Chaos the Clown')
+            G.GAME.current_round.free_rerolls = #chaos'''
+position = 'at'
+match_indent = true
+payload = ''' '''
+
+
+
+
