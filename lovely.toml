@@ -108,9 +108,7 @@ payload = '''
 [[patches]]
 [patches.pattern]
 target = 'functions/button_callbacks.lua'
-pattern = '''            for i = 1, #G.jokers.cards do
-              G.jokers.cards[i]:calculate_joker({reroll_shop = true})
-            end'''
+pattern = '''SMODS.calculate_context({reroll_shop = true})'''
 position = 'after'
 match_indent = true
 payload = '''
