@@ -15,7 +15,7 @@ payload = '''elseif self.ability.name == 'Supernova' then
     loc_vars = {
         self.ability.extra,
         (hand_name ~= "" and "Will give " or "No hand selected"),
-        (hand_name == "????" and "+?" or (hand_name ~= "" and "+"..(G.GAME.hands[hand_name].played + 1) or "")),
+        (hand_name == "????" and "+?" or (hand_name ~= "" and "+"..((G.GAME.hands[hand_name].played + 1) * self.ability.extra) or "")),
         (hand_name ~= "" and " Mult" or ""),
     }'''
 
