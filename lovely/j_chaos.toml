@@ -20,40 +20,40 @@ payload = '''elseif self.ability.name == 'Chaos the Clown' then loc_vars = {
 [patches.pattern]
 target = 'card.lua'
 pattern = '''if self.ability.name == 'Chaos the Clown' then
-            G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls + 1
-            calculate_reroll_cost(true)
-        end'''
+    G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls + 1
+    calculate_reroll_cost(true)
+end'''
 position = 'at'
 match_indent = true
 payload = '''if self.ability.name == "Chaos the Clown" then
-            if G.STATE == G.STATES.SHOP then
-                G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls + self.ability.extra
-                calculate_reroll_cost(true)
-                G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop + self.ability.extra
-                if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
-            end
-        end'''
+    if G.STATE == G.STATES.SHOP then
+        G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls + self.ability.extra
+        calculate_reroll_cost(true)
+        G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop + self.ability.extra
+        if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
+    end
+end'''
 
 
 [[patches]]
 [patches.pattern]
 target = 'card.lua'
 pattern = '''if self.ability.name == 'Chaos the Clown' then
-            G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls - 1
-            calculate_reroll_cost(true)
-        end'''
+    G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls - 1
+    calculate_reroll_cost(true)
+end'''
 position = 'at'
 match_indent = true
 payload = '''if self.ability.name == "Chaos the Clown" then
-            if (self.added_to_deck == false) and not G.SETTINGS.paused then
-                if G.STATE == G.STATES.SHOP then
-                    G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls - self.ability.extra
-                    calculate_reroll_cost(true)
-                    G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop - self.ability.extra
-                    if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
-                end
-            end
-        end'''
+    if (self.added_to_deck == false) and not G.SETTINGS.paused then
+        if G.STATE == G.STATES.SHOP then
+            G.GAME.current_round.free_rerolls = G.GAME.current_round.free_rerolls - self.ability.extra
+            calculate_reroll_cost(true)
+            G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop - self.ability.extra
+            if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
+        end
+    end
+end'''
 
 
 [[patches]]
@@ -68,7 +68,6 @@ payload = '''    if self.ability.name == "Chaos the Clown" then
             calculate_reroll_cost(true)
             G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop - self.ability.extra
             if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
-            print(self.ability.extra, G.GAME.current_round.free_rerolls, G.GAME.current_round.free_rerolls_per_shop)
         end
     end'''
 
@@ -85,7 +84,6 @@ payload = '''    if self.ability.name == "Chaos the Clown" then
             calculate_reroll_cost(true)
             G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop + self.ability.extra
             if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
-            print(self.ability.extra, G.GAME.current_round.free_rerolls, G.GAME.current_round.free_rerolls_per_shop)
         end
     end'''
 
@@ -99,7 +97,6 @@ match_indent = true
 payload = '''    if self.ability.name == "Chaos the Clown" then
         G.GAME.current_round.free_rerolls_per_shop = G.GAME.current_round.free_rerolls_per_shop + self.ability.extra
         if G.GAME.current_round.free_rerolls_per_shop < 0 then G.GAME.current_round.free_rerolls_per_shop = 0 end
-        print(G.GAME.current_round.free_rerolls_per_shop)
     end'''
 
 

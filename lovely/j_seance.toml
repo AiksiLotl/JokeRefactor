@@ -1,0 +1,78 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_seance=           {order = 66,  unlocked = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 6, name = "Seance", pos = {x=0,y=12}, set = "Joker", cost_mult = 1.0, config = {extra = {poker_hand = 'Straight Flush'}}},'''
+position = 'at'
+match_indent = true
+payload = '''j_seance=           {order = 66,  unlocked = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 6, name = "Seance", pos = {x=0,y=12}, set = "Joker", cost_mult = 1.0, config = {extra = {poker_hand = 'Straight Flush', cards_amount = 1}}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Seance' then loc_vars = {localize(self.ability.extra.poker_hand, 'poker_hands')}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Seance' then loc_vars = {
+    localize(self.ability.extra.poker_hand, 'poker_hands'),
+    self.ability.extra.cards_amount,
+    (self.ability.extra.cards_amount ~= 1 and "s" or ""),
+}'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Seance' and #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+    if next(context.poker_hands[self.ability.extra.poker_hand]) then
+        G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+        G.E_MANAGER:add_event(Event({
+            trigger = 'before',
+            delay = 0.0,
+            func = (function()
+                    local card = create_card('Spectral',G.consumeables, nil, nil, nil, nil, nil, 'sea')
+                    card:add_to_deck()
+                    G.consumeables:emplace(card)
+                    G.GAME.consumeable_buffer = 0
+                return true
+            end)}))
+        return {
+            message = localize('k_plus_spectral'),
+            colour = G.C.SECONDARY_SET.Spectral,
+            card = self
+        }
+    end
+end'''
+position = 'at'
+match_indent = true
+payload = '''if self.ability.name == 'Seance' then
+    if next(context.poker_hands[self.ability.extra.poker_hand]) then
+        local created_cards_amount = 0
+        for i = 1, self.ability.extra.cards_amount do
+            if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+                created_cards_amount = created_cards_amount + 1
+                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'before',
+                    delay = 0.0,
+                    func = (function()
+                            local card = create_card('Spectral',G.consumeables, nil, nil, nil, nil, nil, 'sea')
+                            card:add_to_deck()
+                            G.consumeables:emplace(card)
+                            G.GAME.consumeable_buffer = 0
+                        return true
+                    end)}))
+            end
+        end
+        return {
+            message = "+"..created_cards_amount..string.sub(localize('k_plus_spectral'), 3, -1),
+            colour = G.C.SECONDARY_SET.Spectral,
+            card = self
+        }
+    end
+end'''

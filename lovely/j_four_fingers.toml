@@ -1,0 +1,36 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Credit Card' then
+    G.GAME.bankrupt_at = G.GAME.bankrupt_at - self.ability.extra
+end'''
+position = 'before'
+match_indent = true
+payload = '''if self.ability.name == "Four Fingers" then
+    G.GAME.straight_or_flush_min_length = 4
+    print(G.GAME.straight_rank_gap, G.GAME.straight_or_flush_min_length)
+end'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Credit Card' then
+    G.GAME.bankrupt_at = G.GAME.bankrupt_at + self.ability.extra
+end'''
+position = 'before'
+match_indent = true
+payload = '''if self.ability.name == "Four Fingers" then
+    if not G.SETTINGS.paused then
+        if #find_joker("Four Fingers") == 0 then
+            G.GAME.straight_or_flush_min_length = 5
+            print(G.GAME.straight_rank_gap, G.GAME.straight_or_flush_min_length)
+        end
+    end
+end'''

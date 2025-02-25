@@ -1,0 +1,43 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_stencil=          {order = 17,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 8, name = "Joker Stencil", pos = {x=2,y=5}, set = "Joker", effect = "Hand Size Mult", cost_mult = 1.0, config = {}},'''
+position = 'at'
+match_indent = true
+payload = '''j_stencil=          {order = 17,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 8, name = "Joker Stencil", pos = {x=2,y=5}, set = "Joker", effect = "Hand Size Mult", cost_mult = 1.0, config = {x_mult = 1.0, x_mult_mod = 1.0}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Joker Stencil' then loc_vars = {self.ability.x_mult}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Joker Stencil' then loc_vars = {self.ability.x_mult, self.ability.x_mult_mod}'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == "Joker Stencil" then 
+    self.ability.x_mult = (G.jokers.config.card_limit - #G.jokers.cards)
+    for i = 1, #G.jokers.cards do
+        if G.jokers.cards[i].ability.name == 'Joker Stencil' then self.ability.x_mult = self.ability.x_mult + 1 end
+    end
+end'''
+position = 'at'
+match_indent = true
+payload = '''if self.ability.name == "Joker Stencil" then 
+    self.ability.x_mult = (G.jokers.config.card_limit - #G.jokers.cards) * self.ability.x_mult_mod
+    for i = 1, #G.jokers.cards do
+        if G.jokers.cards[i].ability.name == 'Joker Stencil' then self.ability.x_mult = self.ability.x_mult + self.ability.x_mult_mod end
+    end
+end'''
+
+

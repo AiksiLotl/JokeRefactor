@@ -1,0 +1,46 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_gros_michel=      {order = 38,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = false, rarity = 1, cost = 5, name = "Gros Michel", pos = {x=7,y=6}, set = "Joker", effect = "", config = {extra = {odds = 6, mult = 15}}, no_pool_flag = 'gros_michel_extinct'},'''
+position = 'at'
+match_indent = true
+payload = '''j_gros_michel=      {order = 38,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = false, rarity = 1, cost = 5, name = "Gros Michel", pos = {x=7,y=6}, set = "Joker", effect = "", config = {extra = {odds = 1 / 6, mult = 15}}, no_pool_flag = 'gros_michel_extinct'},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Gros Michel' then loc_vars = {self.ability.extra.mult, ''..(G.GAME and G.GAME.probabilities.normal or 1), self.ability.extra.odds}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Gros Michel' then loc_vars = {
+    self.ability.extra.mult, 
+    ''..(G.GAME and G.GAME.probabilities.normal or 1), 
+    (1 / self.ability.extra.odds)
+}'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if pseudorandom(self.ability.name == 'Cavendish' and 'cavendish' or 'gros_michel') < G.GAME.probabilities.normal/self.ability.extra.odds then'''
+position = 'at'
+match_indent = true
+payload = '''if pseudorandom(self.ability.name == 'Cavendish' and 'cavendish' or 'gros_michel') < (G.GAME.probabilities.normal / (1 / self.ability.extra.odds)) then'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Gros Michel' then G.GAME.pool_flags.gros_michel_extinct = true end'''
+position = 'after'
+match_indent = true
+payload = '''for i = 1, #G.jokers.cards do
+    G.jokers.cards[i]:calculate_joker({joker_vanished = self})
+end'''
+

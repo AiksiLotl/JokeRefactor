@@ -1,0 +1,16 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Dusk' then loc_vars = {self.ability.extra+1}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Dusk' then loc_vars = {
+    self.ability.extra,
+    (self.ability.extra ~= 1 and "s" or ""),
+}'''

@@ -1,0 +1,28 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_cavendish=        {order = 61,  unlocked = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = false, rarity = 1, cost = 4, name = "Cavendish", pos = {x=5,y=11}, set = "Joker", cost_mult = 1.0, config = {extra = {odds = 1000, Xmult = 3}}, yes_pool_flag = 'gros_michel_extinct'},'''
+position = 'at'
+match_indent = true
+payload = '''j_cavendish=        {order = 61,  unlocked = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = false, rarity = 1, cost = 4, name = "Cavendish", pos = {x=5,y=11}, set = "Joker", cost_mult = 1.0, config = {extra = {odds = 1 / 1000, Xmult = 3}}, yes_pool_flag = 'gros_michel_extinct'},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Cavendish' then loc_vars = {self.ability.extra.Xmult, ''..(G.GAME and G.GAME.probabilities.normal or 1), self.ability.extra.odds}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Cavendish' then loc_vars = {
+    self.ability.extra.Xmult, 
+    ''..(G.GAME and G.GAME.probabilities.normal or 1), 
+    (1 / self.ability.extra.odds)
+}'''
+
+##Some other fixes in the "j_gros_michel.toml"

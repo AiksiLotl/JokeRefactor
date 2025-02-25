@@ -1,0 +1,50 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_perkeo=           {order = 150,  unlocked = false, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 20, name = "Perkeo", pos = {x=7,y=8}, soul_pos = {x=7, y=9}, set = "Joker", effect = "", config = {}, unlock_condition = {type = '', extra = '', hidden = true}},'''
+position = 'at'
+match_indent = true
+payload = '''j_perkeo=           {order = 150,  unlocked = false, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 20, name = "Perkeo", pos = {x=7,y=8}, soul_pos = {x=7, y=9}, set = "Joker", effect = "", config = {extra = 1.0}, unlock_condition = {type = '', extra = '', hidden = true}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Perkeo' then
+    if G.consumeables.cards[1] then
+        G.E_MANAGER:add_event(Event({
+            func = function() 
+                local card = copy_card(pseudorandom_element(G.consumeables.cards, pseudoseed('perkeo')), nil)
+                card:set_edition({negative = true}, true)
+                card:add_to_deck()
+                G.consumeables:emplace(card) 
+                return true
+            end}))
+        card_eval_status_text(context.blueprint_card or self, 'extra', nil, nil, nil, {message = localize('k_duplicated_ex')})
+    end
+    return
+end'''
+position = 'at'
+match_indent = true
+payload = '''if self.ability.name == 'Perkeo' then
+    if G.consumeables.cards[1] then
+        for i = 1, self.ability.extra do
+            G.E_MANAGER:add_event(Event({
+                func = function() 
+                    local card = copy_card(pseudorandom_element(G.consumeables.cards, pseudoseed('perkeo')), nil)
+                    card:set_edition({negative = true}, true)
+                    card:add_to_deck()
+                    G.consumeables:emplace(card) 
+                    return true
+                end}))
+            card_eval_status_text(context.blueprint_card or self or self, 'extra', nil, nil, nil, {message = localize('k_duplicated_ex')})
+        end
+    return nil, true
+    end
+end'''

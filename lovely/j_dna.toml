@@ -1,0 +1,84 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_dna=              {order = 51,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 3, cost = 8, name = 'DNA', pos = {x = 5, y = 10}, set = 'Joker', config = {}},'''
+position = 'at'
+match_indent = true
+payload = '''j_dna=              {order = 51,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 3, cost = 8, name = 'DNA', pos = {x = 5, y = 10}, set = 'Joker', config = {extra = 1.0}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'DNA' then loc_vars = {self.ability.extra}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'DNA' then loc_vars = {
+    self.ability.extra,
+    (self.ability.extra ~= 1 and "ies" or "y"),
+    (self.ability.extra ~= 1 and "them" or "it"),
+}'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'DNA' and G.GAME.current_round.hands_played == 0 then
+    if #context.full_hand == 1 then
+        G.playing_card = (G.playing_card and G.playing_card + 1) or 1
+        local _card = copy_card(context.full_hand[1], nil, nil, G.playing_card)
+        _card:add_to_deck()
+        G.deck.config.card_limit = G.deck.config.card_limit + 1
+        table.insert(G.playing_cards, _card)
+        G.hand:emplace(_card)
+        _card.states.visible = nil
+
+        G.E_MANAGER:add_event(Event({
+            func = function()
+                _card:start_materialize()
+                return true
+            end
+        })) 
+        return {
+            message = localize('k_copied_ex'),
+            colour = G.C.CHIPS,
+            card = self,
+            playing_cards_created = {true}
+        }
+    end
+end'''
+position = 'at'
+match_indent = true
+payload = '''if self.ability.name == 'DNA' and G.GAME.current_round.hands_played == 0 then
+    if #context.full_hand == 1 then
+        local cards = {}
+        for i = 1, self.ability.extra do
+            G.playing_card = (G.playing_card and G.playing_card + 1) or 1
+            local card = copy_card(context.full_hand[1], nil, nil, G.playing_card)
+            cards[i] = card
+            card:add_to_deck()
+            G.deck.config.card_limit = G.deck.config.card_limit + 1
+            table.insert(G.playing_cards, card)
+            G.hand:emplace(card)
+            card.states.visible = nil
+
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    card:start_materialize()
+                    return true
+                end
+            }))
+        end
+        return {
+            message = localize('k_copied_ex'),
+            colour = G.C.CHIPS,
+            card = self,
+            playing_cards_created = cards
+        }
+    end
+end'''

@@ -9,7 +9,7 @@ target = 'game.lua'
 pattern = '''j_8_ball=           {order = 26,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 5, name = "8 Ball", pos = {x=0,y=5}, set = "Joker", effect = "Spawn Tarot", cost_mult = 1.0, config = {extra=4}},'''
 position = 'at'
 match_indent = true
-payload = '''j_8_ball=           {order = 26,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 5, name = "8 Ball", key = "j_8_ball", pos = {x=0,y=5}, set = "Joker", effect = "Spawn Tarot", cost_mult = 1.0, config = {odds = 1 / 4, extra = 1}},'''
+payload = '''j_8_ball=           {order = 26,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 5, name = "8 Ball", pos = {x=0,y=5}, set = "Joker", effect = "Spawn Tarot", cost_mult = 1.0, config = {odds = 1 / 4, extra = 1}},'''
 
 
 [[patches]]
@@ -30,51 +30,74 @@ payload = '''elseif self.ability.name == '8 Ball' then loc_vars = {
 [patches.pattern]
 target = 'card.lua'
 pattern = '''if self.ability.name == '8 Ball' and #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
-                    if (context.other_card:get_id() == 8) and (pseudorandom('8ball') < G.GAME.probabilities.normal/self.ability.extra) then
-                        G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
-                        return {
-                            extra = {focus = self, message = localize('k_plus_tarot'), func = function()
-                                G.E_MANAGER:add_event(Event({
-                                    trigger = 'before',
-                                    delay = 0.0,
-                                    func = (function()
-                                            local card = create_card('Tarot',G.consumeables, nil, nil, nil, nil, nil, '8ba')
-                                            card:add_to_deck()
-                                            G.consumeables:emplace(card)
-                                            G.GAME.consumeable_buffer = 0
-                                        return true
-                                    end)}))
-                            end},
-                            colour = G.C.SECONDARY_SET.Tarot,
-                            card = self
-                        }
-                    end
-                end'''
+    if (context.other_card:get_id() == 8) and (pseudorandom('8ball') < G.GAME.probabilities.normal/self.ability.extra) then
+        G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+        return {
+            extra = {focus = self, message = localize('k_plus_tarot'), func = function()
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'before',
+                    delay = 0.0,
+                    func = (function()
+                            local card = create_card('Tarot',G.consumeables, nil, nil, nil, nil, nil, '8ba')
+                            card:add_to_deck()
+                            G.consumeables:emplace(card)
+                            G.GAME.consumeable_buffer = 0
+                        return true
+                    end)}))
+            end},
+            colour = G.C.SECONDARY_SET.Tarot,
+            card = self
+        }
+    end
+end'''
 position = 'at'
 match_indent = true
 payload = '''if self.ability.name == "8 Ball" then
-                    if (context.other_card:get_id() == 8) and (pseudorandom('8ball') < (G.GAME.probabilities.normal / (1 / self.ability.odds))) then
-                        local cards_to_add = math.min((G.consumeables.config.card_limit - #G.consumeables.cards - G.GAME.consumeable_buffer), self.ability.extra)
-                        if cards_to_add > 0 then
-                            G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + cards_to_add
-                            return {
-                                extra = {focus = self, message = "+"..cards_to_add..string.sub(localize('k_plus_tarot'), 3, -1), func = function()
-                                    G.E_MANAGER:add_event(Event({
-                                        trigger = 'before',
-                                        delay = 0.0,
-                                        func = (function()
-                                            for i = 1, cards_to_add do
-                                                local new_card = create_card('Tarot',G.consumeables, nil, nil, nil, nil, nil, '8ba')
-                                                new_card:add_to_deck()
-                                                G.consumeables:emplace(new_card)
-                                                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer - 1
-                                            end
-                                            return true
-                                        end)}))
-                                end},
-                                colour = G.C.SECONDARY_SET.Tarot,
-                                card = self
-                            }
-                        end
-                    end
-                end'''
+    if (context.other_card:get_id() == 8) and (pseudorandom('8ball') < (G.GAME.probabilities.normal / (1 / self.ability.odds))) then
+        local cards_to_add = math.min((G.consumeables.config.card_limit - #G.consumeables.cards - G.GAME.consumeable_buffer), self.ability.extra)
+        if cards_to_add > 0 then
+            G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + cards_to_add
+            return {
+                extra = {focus = self, message = "+"..cards_to_add..string.sub(localize('k_plus_tarot'), 3, -1), func = function()
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'before',
+                        delay = 0.0,
+                        func = (function()
+                            for i = 1, cards_to_add do
+                                local new_card = create_card('Tarot',G.consumeables, nil, nil, nil, nil, nil, '8ba')
+                                new_card:add_to_deck()
+                                G.consumeables:emplace(new_card)
+                                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer - 1
+                            end
+                            return true
+                        end)}))
+                end},
+                colour = G.C.SECONDARY_SET.Tarot,
+                card = self
+            }
+        end
+    end
+end'''
+
+
+## Inspired by Sixth Sense (cleaner, visually works differently sadly, creates a card before it is scored)
+#payload = '''if self.ability.name == "8 Ball" then
+#    if (context.other_card:get_id() == 8) and (pseudorandom('8ball') < (G.GAME.probabilities.normal / (1 / self.ability.odds))) then
+#        for i = 1, self.ability.extra do
+#            if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+#                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+#                G.E_MANAGER:add_event(Event({
+#                    trigger = 'before',
+#                    delay = 0.0,
+#                    func = (function()
+#                            local card = create_card('Tarot',G.consumeables, nil, nil, nil, nil, nil, '8ba')
+#                            card:add_to_deck()
+#                            G.consumeables:emplace(card)
+#                            G.GAME.consumeable_buffer = 0
+#                        return true
+#                    end)}))
+#                card_eval_status_text(context.blueprint_card or self, 'extra', nil, nil, nil, {message = localize('k_plus_tarot'), colour = G.C.SECONDARY_SET.Tarot})
+#            end
+#        end
+#    end
+#end'''

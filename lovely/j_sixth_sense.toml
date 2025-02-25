@@ -1,0 +1,61 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_sixth_sense=      {order = 54,  unlocked = true,  discovered = false, blueprint_compat = false, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 6, name = 'Sixth Sense', pos = {x = 8, y = 10}, set = 'Joker', config = {}},'''
+position = 'at'
+match_indent = true
+payload = '''j_sixth_sense=      {order = 54,  unlocked = true,  discovered = false, blueprint_compat = false, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 6, name = 'Sixth Sense', pos = {x = 8, y = 10}, set = 'Joker', config = {extra = 1.0}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Sixth Sense' then loc_vars = {}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Sixth Sense' then loc_vars = {
+    self.ability.extra,
+    (self.ability.extra ~= 1 and "s" or ""),
+}'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+    G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+    G.E_MANAGER:add_event(Event({
+        trigger = 'before',
+        delay = 0.0,
+        func = (function()
+                local card = create_card('Spectral',G.consumeables, nil, nil, nil, nil, nil, 'sixth')
+                card:add_to_deck()
+                G.consumeables:emplace(card)
+                G.GAME.consumeable_buffer = 0
+            return true
+        end)}))
+    card_eval_status_text(context.blueprint_card or self, 'extra', nil, nil, nil, {message = localize('k_plus_spectral'), colour = G.C.SECONDARY_SET.Spectral})
+end'''
+position = 'at'
+match_indent = true
+payload = '''for i = 1, self.ability.extra do
+    if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+        G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+        G.E_MANAGER:add_event(Event({
+            trigger = 'before',
+            delay = 0.0,
+            func = (function()
+                    local card = create_card('Spectral',G.consumeables, nil, nil, nil, nil, nil, 'sixth')
+                    card:add_to_deck()
+                    G.consumeables:emplace(card)
+                    G.GAME.consumeable_buffer = 0
+                return true
+            end)}))
+        card_eval_status_text(context.blueprint_card or self, 'extra', nil, nil, nil, {message = localize('k_plus_spectral'), colour = G.C.SECONDARY_SET.Spectral})
+    end
+end'''

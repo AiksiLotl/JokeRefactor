@@ -1,0 +1,38 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Supernova' then'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Supernova' then 
+    local hand_name = G.GAME.current_round.current_hand.handname
+    loc_vars = {
+        self.ability.extra,
+        (hand_name ~= "" and "Will give " or "No hand selected"),
+        (hand_name == "????" and "+?" or (hand_name ~= "" and "+"..(G.GAME.hands[hand_name].played + 1) or "")),
+        (hand_name ~= "" and " Mult" or ""),
+    }'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Supernova' then
+    return {
+        message = localize{type='variable',key='a_mult',vars={G.GAME.hands[context.scoring_name].played}},
+        mult_mod = G.GAME.hands[context.scoring_name].played
+    }
+end'''
+position = 'at'
+match_indent = true
+payload = '''if self.ability.name == 'Supernova' then
+    return {
+        message = localize{type='variable',key='a_mult',vars={G.GAME.hands[context.scoring_name].played * self.ability.extra}},
+        mult_mod = G.GAME.hands[context.scoring_name].played * self.ability.extra
+    }
+end'''

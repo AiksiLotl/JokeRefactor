@@ -1,0 +1,64 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_ceremonial=       {order = 21,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = false, eternal_compat = true, rarity = 2, cost = 6, name = "Ceremonial Dagger", pos = {x=5,y=5}, set = "Joker", effect = "", config = {mult = 0}},'''
+position = 'at'
+match_indent = true
+payload = '''j_ceremonial=       {order = 21,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = false, eternal_compat = true, rarity = 2, cost = 6, name = "Ceremonial Dagger", pos = {x=5,y=5}, set = "Joker", effect = "", config = {mult = 0.0, jokers_amount = 1.0, value_mult = 2.0}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Ceremonial Dagger' then loc_vars = {self.ability.mult}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Ceremonial Dagger' then loc_vars = {
+    self.ability.mult,
+    self.ability.jokers_amount,
+    self.ability.value_mult,
+    (self.ability.jokers_amount ~= 1 and "s" or ""),
+}'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''    if my_pos and G.jokers.cards[my_pos+1] and not self.getting_sliced and not G.jokers.cards[my_pos+1].ability.eternal and not G.jokers.cards[my_pos+1].getting_sliced then 
+        local sliced_card = G.jokers.cards[my_pos+1]
+        sliced_card.getting_sliced = true
+        G.GAME.joker_buffer = G.GAME.joker_buffer - 1
+        G.E_MANAGER:add_event(Event({func = function()
+            G.GAME.joker_buffer = 0
+            self.ability.mult = self.ability.mult + sliced_card.sell_cost*2
+            self:juice_up(0.8, 0.8)
+            sliced_card:start_dissolve({HEX("57ecab")}, nil, 1.6)
+            play_sound('slice1', 0.96+math.random()*0.08)
+        return true end }))
+        card_eval_status_text(self, 'extra', nil, nil, nil, {message = localize{type = 'variable', key = 'a_mult', vars = {self.ability.mult+2*sliced_card.sell_cost}}, colour = G.C.RED, no_juice = true})'''
+position = 'at'
+match_indent = true
+payload = '''local current_mult = self.ability.mult
+for i = 1, self.ability.jokers_amount do
+    if my_pos and G.jokers.cards[my_pos+1] and not self.getting_sliced and not G.jokers.cards[my_pos+1].ability.eternal and not G.jokers.cards[my_pos+1].getting_sliced then 
+        local sliced_card = G.jokers.cards[my_pos+1]
+        my_pos = my_pos + 1
+        sliced_card.getting_sliced = true
+        G.GAME.joker_buffer = G.GAME.joker_buffer - 1
+        G.E_MANAGER:add_event(Event({func = function()
+            G.GAME.joker_buffer = 0
+            self.ability.mult = self.ability.mult + sliced_card.sell_cost * self.ability.value_mult
+            self:juice_up(0.8, 0.8)
+            sliced_card:start_dissolve({HEX("57ecab")}, nil, 1.6)
+            play_sound('slice1', 0.96+math.random()*0.08)
+        return true end }))
+        current_mult = current_mult + sliced_card.sell_cost * self.ability.value_mult
+        card_eval_status_text(self, 'extra', nil, nil, nil, {message = localize{type = 'variable', key = 'a_mult', vars = {current_mult}}, colour = G.C.RED, no_juice = true})
+    end
+end
+if true then'''

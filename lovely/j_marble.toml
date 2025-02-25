@@ -1,0 +1,65 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Marble Joker' then'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Marble Joker' then loc_vars = {
+    self.ability.extra,
+    (self.ability.extra ~= 1 and "s" or ""),
+}'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''G.E_MANAGER:add_event(Event({
+    func = function() 
+        local front = pseudorandom_element(G.P_CARDS, pseudoseed('marb_fr'))
+        G.playing_card = (G.playing_card and G.playing_card + 1) or 1
+        local card = Card(G.play.T.x + G.play.T.w/2, G.play.T.y, G.CARD_W, G.CARD_H, front, G.P_CENTERS.m_stone, {playing_card = G.playing_card})
+        card:start_materialize({G.C.SECONDARY_SET.Enhanced})
+        G.play:emplace(card)
+        table.insert(G.playing_cards, card)
+        return true
+    end}))
+card_eval_status_text(context.blueprint_card or self, 'extra', nil, nil, nil, {message = localize('k_plus_stone'), colour = G.C.SECONDARY_SET.Enhanced})
+
+G.E_MANAGER:add_event(Event({
+    func = function() 
+        G.deck.config.card_limit = G.deck.config.card_limit + 1
+        return true
+    end}))
+    draw_card(G.play,G.deck, 90,'up', nil)  
+
+playing_card_joker_effects({true})'''
+position = 'at'
+match_indent = true
+payload = '''for i = 1, self.ability.extra do
+    G.E_MANAGER:add_event(Event({
+        func = function() 
+            local front = pseudorandom_element(G.P_CARDS, pseudoseed('marb_fr'))
+            G.playing_card = (G.playing_card and G.playing_card + 1) or 1
+            local card = Card(G.play.T.x + G.play.T.w/2, G.play.T.y, G.CARD_W, G.CARD_H, front, G.P_CENTERS.m_stone, {playing_card = G.playing_card})
+            card:start_materialize({G.C.SECONDARY_SET.Enhanced})
+            G.play:emplace(card)
+            table.insert(G.playing_cards, card)
+            return true
+        end}))
+    card_eval_status_text(context.blueprint_card or self, 'extra', nil, nil, nil, {message = localize('k_plus_stone'), colour = G.C.SECONDARY_SET.Enhanced})
+
+    G.E_MANAGER:add_event(Event({
+        func = function() 
+            G.deck.config.card_limit = G.deck.config.card_limit + 1
+            return true
+        end}))
+        draw_card(G.play,G.deck, 90,'up', nil)  
+
+    playing_card_joker_effects({true})
+end'''

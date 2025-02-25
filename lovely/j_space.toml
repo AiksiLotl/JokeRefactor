@@ -1,0 +1,41 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_space=            {order = 45,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 5, name = "Space Joker", pos = {x=3,y=5}, set = "Joker", effect = "Upgrade Hand chance", cost_mult = 1.0, config = {extra = 4}},'''
+position = 'at'
+match_indent = true
+payload = '''j_space=            {order = 45,  unlocked = true,  discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 5, name = "Space Joker", pos = {x=3,y=5}, set = "Joker", effect = "Upgrade Hand chance", cost_mult = 1.0, config = {extra = 1, odds = 1 / 4}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Space Joker' then loc_vars = {''..(G.GAME and G.GAME.probabilities.normal or 1), self.ability.extra}'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Space Joker' then loc_vars = {
+    ''..(G.GAME and G.GAME.probabilities.normal or 1), 
+    (1 / self.ability.odds),
+    self.ability.extra,
+    (self.ability.extra ~= 1 and "s" or ""),
+}'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Space Joker' and pseudorandom('space') < G.GAME.probabilities.normal/self.ability.extra then
+    return {
+        card = self,
+        level_up = true,'''
+position = 'at'
+match_indent = true
+payload = '''if self.ability.name == 'Space Joker' and pseudorandom('space') < (G.GAME.probabilities.normal / (1 / self.ability.odds)) then
+    return {
+        card = self,
+        level_up = self.ability.extra,'''

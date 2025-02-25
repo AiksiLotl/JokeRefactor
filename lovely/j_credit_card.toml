@@ -7,17 +7,20 @@ priority = 0
 [[patches]]
 [patches.pattern]
 target = 'card.lua'
-pattern = '''                if G.jokers.cards[i].ability.name == 'Joker Stencil' then self.ability.x_mult = self.ability.x_mult + 1 end
-            end
-        end'''
+pattern = '''elseif context.before_values_updated then'''
 position = 'after'
 match_indent = true
-payload = '''        if self.ability.name == "Credit Card" then
-            if not self.ability.previous_value then
-                self.ability.previous_value = self.ability.extra
-            elseif not (self.ability.previous_value == self.ability.extra) then
-                G.GAME.bankrupt_at = G.GAME.bankrupt_at + self.ability.previous_value
-                G.GAME.bankrupt_at = G.GAME.bankrupt_at - self.ability.extra
-                self.ability.previous_value = self.ability.extra
-            end
-        end'''
+payload = '''    if self.ability.name == "Credit Card" then
+        G.GAME.bankrupt_at = G.GAME.bankrupt_at + self.ability.extra
+    end'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif context.after_values_updated then'''
+position = 'after'
+match_indent = true
+payload = '''    if self.ability.name == "Credit Card" then
+        G.GAME.bankrupt_at = G.GAME.bankrupt_at - self.ability.extra
+    end'''

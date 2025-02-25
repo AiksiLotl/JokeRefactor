@@ -20,19 +20,19 @@
     --j_8_ball = "8 Ball",
     --j_raised_fist = "Raised Fist",
     --j_chaos = "Chaos the Clown",
-    j_gros_michel = "Gros Michel",
+    --j_gros_michel = "Gros Michel",
     --j_business = "Business Card",
     --- Uncommon
-    j_stencil = "Joker Stencil",
-    j_hack = "Hack",
-    -- j_four_fingers = "Four Fingers",
-    j_mime = "Mime",
-    j_ceremonial = "Ceremonial Dagger",
-    j_marble = "Marble Joker",
-    j_dusk = "Dusk",
+    --j_stencil = "Joker Stencil",
+    --j_hack = "Hack",
+    --j_four_fingers = "Four Fingers",
+    --j_mime = "Mime",
+    --j_ceremonial = "Ceremonial Dagger",
+    --j_marble = "Marble Joker",
+    --j_dusk = "Dusk",
     --- Rare
     --- Legendary
-    j_perkeo = "Perkeo",
+    --j_perkeo = "Perkeo",
 }
 
 local function_list = {} ]]
@@ -105,17 +105,17 @@ G.P_CENTERS["j_tribe"].config.Xmult = nil
 -- X Hack
 -- X Gros Michel
 -- X Business Card
--- Supernova
--- Space Joker
--- DNA
--- Sixth Sense ???
--- Faceless Joker ???
--- Superposition
--- Cavendish
--- Madness
--- Square Joker ???
--- Seance
--- Shortcut
+-- X Supernova
+-- X Space Joker
+-- X DNA
+-- X Sixth Sense ???
+-- Faceless Joker ??? No
+-- X Superposition
+-- X Cavendish
+-- X Madness
+-- X Square Joker ???
+-- X Seance
+-- X Shortcut
 -- Vagabond
 -- Turtle Bean
 -- Reserved Parking

@@ -1,0 +1,72 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''j_shortcut=         {order = 69,  unlocked = true, discovered = false, blueprint_compat = false, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 7, name = "Shortcut",set = "Joker", config = {},  pos = {x=3,y=12}},'''
+position = 'at'
+match_indent = true
+payload = '''j_shortcut=         {order = 69,  unlocked = true, discovered = false, blueprint_compat = false, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 7, name = "Shortcut",set = "Joker", config = {straight_rank_gap = 1},  pos = {x=3,y=12}},'''
+
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif self.ability.name == 'Shortcut' then'''
+position = 'at'
+match_indent = true
+payload = '''elseif self.ability.name == 'Shortcut' then 
+    local straight_rank_gap = self.added_to_deck and G.GAME.straight_rank_gap or G.GAME.straight_rank_gap + self.ability.straight_rank_gap
+    loc_vars = {
+        self.ability.straight_rank_gap,
+        ((8 + straight_rank_gap) == 10 and "10" or ((8 + straight_rank_gap) == 11 and "J" or ((8 + straight_rank_gap) == 12 and "Q" or ((8 + straight_rank_gap) == 13 and "K" or ((8 + straight_rank_gap) >= 14 and "A" or "8"))))),
+        ((5 - straight_rank_gap) == 3 and "6 5 3" or ((5 - straight_rank_gap) == 2 and "6 5 2" or ((5 - straight_rank_gap) <= 1 and "6 5 A" or "7 6 5")))
+    }'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Credit Card' then
+    G.GAME.bankrupt_at = G.GAME.bankrupt_at - self.ability.extra
+end'''
+position = 'before'
+match_indent = true
+payload = '''if self.ability.name == "Shortcut" then
+    G.GAME.straight_rank_gap = G.GAME.straight_rank_gap + self.ability.straight_rank_gap
+end'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''if self.ability.name == 'Credit Card' then
+    G.GAME.bankrupt_at = G.GAME.bankrupt_at + self.ability.extra
+end'''
+position = 'before'
+match_indent = true
+payload = '''if self.ability.name == "Shortcut" then
+    G.GAME.straight_rank_gap = G.GAME.straight_rank_gap - self.ability.straight_rank_gap
+end'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif context.before_values_updated then'''
+position = 'after'
+match_indent = true
+payload = '''    if self.ability.name == "Shortcut" then
+        G.GAME.straight_rank_gap = G.GAME.straight_rank_gap - self.ability.straight_rank_gap
+    end'''
+
+[[patches]]
+[patches.pattern]
+target = 'card.lua'
+pattern = '''elseif context.after_values_updated then'''
+position = 'after'
+match_indent = true
+payload = '''    if self.ability.name == "Shortcut" then
+        G.GAME.straight_rank_gap = G.GAME.straight_rank_gap + self.ability.straight_rank_gap
+    end'''
